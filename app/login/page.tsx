@@ -6,10 +6,10 @@ import { Eye, EyeOff, Zap, TrendingUp, Bell, BarChart2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const DEMO_ACCOUNTS = [
-  { label: 'Apex Home Services', sublabel: 'Owner — Admin access', email: 'owner@apexhome.com', password: 'apex2024', badge: 'Admin', badgeClass: 'bg-blue-600 text-white' },
-  { label: 'Apex Home Services', sublabel: 'Sarah Chen — View only', email: 'sarah@apexhome.com', password: 'sarah123', badge: 'Viewer', badgeClass: 'bg-slate-600 text-white' },
-  { label: 'Blue Ridge Plumbing', sublabel: 'Tom Bradley — Admin access', email: 'owner@blueridge.com', password: 'ridge2024', badge: 'Admin', badgeClass: 'bg-blue-600 text-white' },
-  { label: 'Blue Ridge Plumbing', sublabel: 'Jake Torres — View only', email: 'jake@blueridge.com', password: 'jake123', badge: 'Viewer', badgeClass: 'bg-slate-600 text-white' },
+  { label: 'Sunrise HVAC', sublabel: 'HVAC · Austin, TX', email: 'owner@sunrisehvac.com', password: 'apex2024', badge: 'HVAC', badgeClass: 'bg-blue-600 text-white' },
+  { label: 'Blue Ridge Plumbing', sublabel: 'Plumbing · Denver, CO', email: 'owner@blueridge.com', password: 'ridge2024', badge: 'Plumbing', badgeClass: 'bg-cyan-600 text-white' },
+  { label: 'Bright Wire Electric', sublabel: 'Electrical · Phoenix, AZ', email: 'owner@brightwireelectric.com', password: 'bright2024', badge: 'Electric', badgeClass: 'bg-amber-500 text-white' },
+  { label: 'Peak Roofing Co.', sublabel: 'Roofing · Dallas, TX', email: 'owner@peakroofing.com', password: 'peak2024', badge: 'Roofing', badgeClass: 'bg-orange-700 text-white' },
 ];
 
 export default function LoginPage() {

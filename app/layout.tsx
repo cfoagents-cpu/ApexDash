@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'Apex Home Services — Dashboard',
-  description: 'Business intelligence dashboard for Apex Home Services',
+  title: 'Apex Dashboard — Business Intelligence',
+  description: 'Business intelligence dashboard for home service businesses',
 };
 
 export default function RootLayout({

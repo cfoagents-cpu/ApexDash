@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Eye, EyeOff, Zap, TrendingUp, Bell, BarChart2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import Link from 'next/link';
 
 const DEMO_ACCOUNTS = [
   { label: 'Sunrise HVAC', sublabel: 'HVAC · Austin, TX', email: 'owner@sunrisehvac.com', password: 'apex2024', badge: 'HVAC', badgeClass: 'bg-blue-600 text-white' },
@@ -22,21 +23,21 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError('');
     setLoading(true);
-    const ok = login(email.trim(), password);
+    const { ok, error: err } = await login(email.trim(), password);
     setLoading(false);
     if (ok) {
       router.push('/dashboard');
     } else {
-      setError('Incorrect email or password. Try a demo account below.');
+      setError(err ?? 'Incorrect email or password. Try a demo account below.');
     }
   }
 
-  function loginAsDemo(acc: typeof DEMO_ACCOUNTS[0]) {
-    login(acc.email, acc.password);
+  async function loginAsDemo(acc: typeof DEMO_ACCOUNTS[0]) {
+    await login(acc.email, acc.password);
     router.push('/dashboard');
   }
 
@@ -198,8 +199,11 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <p className="text-center text-xs text-muted-foreground mt-8">
-            Apex Dashboard · For home service businesses
+          <p className="text-center text-sm text-muted-foreground mt-6">
+            Don&apos;t have an account?{' '}
+            <Link href="/signup" className="text-blue-500 hover:text-blue-600 font-medium">
+              Get started free
+            </Link>
           </p>
         </div>
       </div>

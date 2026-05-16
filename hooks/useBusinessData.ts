@@ -1,4 +1,5 @@
 import { useAuth } from '@/contexts/AuthContext';
+// Real users fall through to the apex/HVAC sample data by default
 import * as apexRanged from '@/lib/rangedData';
 import * as apexMock from '@/lib/mockData';
 import * as ridge from '@/lib/blueridgeData';

@@ -8,14 +8,23 @@ import { DateRangeProvider } from '@/contexts/DateRangeContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, isLoading } = useAuth();
+  const { user, business, isRealUser, isLoading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !user) {
+    if (isLoading) return;
+    if (!user) {
       router.replace('/login');
+      return;
     }
-  }, [user, isLoading, router]);
+    if (isRealUser && user.businessId === '') {
+      // Signed up but hasn't filled in business info
+      router.replace('/onboarding');
+    } else if (isRealUser && !business) {
+      // Filled in info but not yet approved
+      router.replace('/waiting');
+    }
+  }, [user, business, isRealUser, isLoading, router]);
 
   if (isLoading || !user) {
     return (
@@ -34,6 +43,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="flex items-center justify-center gap-2 py-1.5 bg-amber-500/10 border-b border-amber-500/20 flex-shrink-0">
               <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
                 View-only mode — contact your admin to make changes
+              </span>
+            </div>
+          )}
+          {isRealUser && (
+            <div className="flex items-center justify-center gap-2 py-1.5 bg-blue-500/10 border-b border-blue-500/20 flex-shrink-0">
+              <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
+                You&apos;re viewing sample data — real data entry coming soon
               </span>
             </div>
           )}

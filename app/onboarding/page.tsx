@@ -41,7 +41,12 @@ export default function OnboardingPage() {
     setLoading(true);
 
     const { data: { session } } = await supabase.auth.getSession();
-    if (!session) { router.push('/login'); return; }
+    if (!session) {
+      setLoading(false);
+      setError('Your session expired. Please sign in again.');
+      router.push('/login');
+      return;
+    }
 
     const { error: insertError } = await supabase.from('businesses').insert({
       user_id: session.user.id,
@@ -59,7 +64,7 @@ export default function OnboardingPage() {
     setLoading(false);
 
     if (insertError) {
-      setError('Something went wrong. Please try again.');
+      setError(`Error: ${insertError.message}`);
       return;
     }
 

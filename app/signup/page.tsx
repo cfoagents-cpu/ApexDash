@@ -29,11 +29,17 @@ export default function SignupPage() {
     }
 
     setLoading(true);
-    const { error: signUpError } = await supabase.auth.signUp({ email, password });
+    const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
     setLoading(false);
 
     if (signUpError) {
       setError(signUpError.message);
+      return;
+    }
+
+    // If session is null, email confirmation is still required
+    if (!data.session) {
+      setError('Please check your email and confirm your address before continuing.');
       return;
     }
 

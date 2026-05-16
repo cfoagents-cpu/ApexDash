@@ -1,13 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Zap, CheckCircle, Clock, Users, RefreshCw } from 'lucide-react';
-import { createClient } from '@supabase/supabase-js';
-
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-);
 
 interface Applicant {
   user_id: string;
@@ -30,27 +24,29 @@ export default function AdminPage() {
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    const res = await fetch('/api/approve-user', {
+    const res = await fetch('/api/admin/signups', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ adminPassword: password, userId: '__check__' }),
+      body: JSON.stringify({ adminPassword: password }),
     });
-    // 401 = wrong password, 500 with "invalid input" = correct password (userId doesn't exist)
     if (res.status === 401) {
       setAuthError('Wrong password.');
       return;
     }
+    const json = await res.json();
+    setApplicants(json.data ?? []);
     setAuthed(true);
-    loadApplicants();
   }
 
   async function loadApplicants() {
     setLoading(true);
-    const { data } = await supabase
-      .from('businesses')
-      .select('user_id, name, industry, city, state, email, approved, created_at')
-      .order('created_at', { ascending: false });
-    setApplicants(data ?? []);
+    const res = await fetch('/api/admin/signups', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPassword: password }),
+    });
+    const json = await res.json();
+    setApplicants(json.data ?? []);
     setLoading(false);
   }
 

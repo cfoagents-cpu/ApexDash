@@ -13,7 +13,7 @@ export default function WaitingPage() {
           <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
             <Zap className="w-5 h-5 text-white" fill="white" />
           </div>
-          <span className="text-foreground font-bold text-xl tracking-tight">Apex Dashboard</span>
+          <span className="text-foreground font-bold text-xl tracking-tight">FieldMetrics</span>
         </div>
 
         <div className="w-16 h-16 bg-blue-600/10 rounded-full flex items-center justify-center mx-auto mb-6">

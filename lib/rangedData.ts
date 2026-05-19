@@ -401,7 +401,7 @@ export const rangedCustomerChart: Record<DateRange, { month: string; new: number
 // Each value is the % change vs the equivalent prior period (+ = up, - = down).
 // today → vs yesterday | 7d → vs prev 7d | 30d → vs prev 30d | etc.
 
-export type RangedChanges = Record<keyof RangedStats, number>;
+export type RangedChanges = Record<keyof RangedStats, number | null>;
 
 export const rangedChanges: Record<DateRange, RangedChanges> = {
   today: {

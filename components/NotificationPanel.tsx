@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, ArrowRight } from 'lucide-react';
-import { notifications, type AppNotification, type NotificationTier } from '@/lib/notifications';
+import { type AppNotification, type NotificationTier } from '@/lib/notifications';
 
 interface Props {
   isOpen: boolean;
@@ -11,6 +11,7 @@ interface Props {
   readIds: Set<string>;
   onMarkRead: (id: string) => void;
   onMarkAllRead: () => void;
+  notifications: AppNotification[];
 }
 
 const TIER_META: Record<
@@ -55,7 +56,7 @@ const ROUTE_LABELS: Record<string, string> = {
   '/dashboard': 'Overview',
 };
 
-export function NotificationPanel({ isOpen, onClose, readIds, onMarkRead, onMarkAllRead }: Props) {
+export function NotificationPanel({ isOpen, onClose, readIds, onMarkRead, onMarkAllRead, notifications }: Props) {
   const router = useRouter();
   const [expandedId, setExpandedId] = useState<string | null>(null);
 

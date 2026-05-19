@@ -27,6 +27,15 @@ export function LeadSourcePieChart() {
   const tipTxt = dark ? '#E8EAED' : '#111827';
   const legend = dark ? '#9AA0A6' : '#9CA3AF';
 
+  if (data.length === 0) {
+    return (
+      <div className="h-[220px] flex flex-col items-center justify-center gap-2 text-center">
+        <p className="text-sm text-muted-foreground">No lead source data yet</p>
+        <p className="text-xs text-muted-foreground/70">Add your marketing sources in My Data to see this chart</p>
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={220}>
       <PieChart>

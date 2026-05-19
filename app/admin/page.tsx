@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Zap, CheckCircle, Clock, Users, RefreshCw } from 'lucide-react';
+import { Zap, CheckCircle, Clock, Users, RefreshCw, Trash2 } from 'lucide-react';
 
 interface Applicant {
   user_id: string;
@@ -21,6 +21,8 @@ export default function AdminPage() {
   const [applicants, setApplicants] = useState<Applicant[]>([]);
   const [loading, setLoading] = useState(false);
   const [approving, setApproving] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
@@ -48,6 +50,18 @@ export default function AdminPage() {
     const json = await res.json();
     setApplicants(json.data ?? []);
     setLoading(false);
+  }
+
+  async function deleteUser(userId: string) {
+    setDeleting(userId);
+    await fetch('/api/delete-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ adminPassword: password, userId }),
+    });
+    setDeleting(null);
+    setConfirmDelete(null);
+    loadApplicants();
   }
 
   async function approve(userId: string) {
@@ -106,7 +120,7 @@ export default function AdminPage() {
             </div>
             <div>
               <h1 className="text-xl font-bold text-foreground">Admin Panel</h1>
-              <p className="text-xs text-muted-foreground">Apex Dashboard</p>
+              <p className="text-xs text-muted-foreground">FieldMetrics</p>
             </div>
           </div>
           <button
@@ -158,13 +172,40 @@ export default function AdminPage() {
                     </p>
                     <p className="text-xs text-muted-foreground">{a.email}</p>
                   </div>
-                  <button
-                    onClick={() => approve(a.user_id)}
-                    disabled={approving === a.user_id}
-                    className="flex-shrink-0 px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-xs font-semibold rounded-lg transition-colors"
-                  >
-                    {approving === a.user_id ? 'Approving…' : 'Approve'}
-                  </button>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => approve(a.user_id)}
+                      disabled={approving === a.user_id}
+                      className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-xs font-semibold rounded-lg transition-colors"
+                    >
+                      {approving === a.user_id ? 'Approving…' : 'Approve'}
+                    </button>
+                    {confirmDelete === a.user_id ? (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-red-500 font-medium">Delete?</span>
+                        <button
+                          onClick={() => deleteUser(a.user_id)}
+                          disabled={deleting === a.user_id}
+                          className="px-2.5 py-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-xs font-semibold rounded-lg transition-colors"
+                        >
+                          {deleting === a.user_id ? '…' : 'Yes'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmDelete(null)}
+                          className="px-2.5 py-1.5 border border-border text-xs font-semibold rounded-lg hover:bg-muted transition-colors text-foreground"
+                        >
+                          No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDelete(a.user_id)}
+                        className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
@@ -180,14 +221,41 @@ export default function AdminPage() {
             </h2>
             <div className="space-y-2">
               {approved.map(a => (
-                <div key={a.user_id} className="border border-border rounded-xl px-4 py-3 bg-card flex items-center justify-between gap-4 opacity-70">
+                <div key={a.user_id} className="border border-border rounded-xl px-4 py-3 bg-card flex items-center justify-between gap-4">
                   <div>
                     <p className="font-medium text-foreground text-sm">{a.name}</p>
                     <p className="text-xs text-muted-foreground">
                       {[a.industry, a.city && a.state ? `${a.city}, ${a.state}` : ''].filter(Boolean).join(' · ')} · {a.email}
                     </p>
                   </div>
-                  <span className="text-xs text-green-600 dark:text-green-400 font-medium">Approved</span>
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <span className="text-xs text-green-600 dark:text-green-400 font-medium">Approved</span>
+                    {confirmDelete === a.user_id ? (
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-red-500 font-medium">Delete?</span>
+                        <button
+                          onClick={() => deleteUser(a.user_id)}
+                          disabled={deleting === a.user_id}
+                          className="px-2.5 py-1.5 bg-red-600 hover:bg-red-700 disabled:opacity-60 text-white text-xs font-semibold rounded-lg transition-colors"
+                        >
+                          {deleting === a.user_id ? '…' : 'Yes'}
+                        </button>
+                        <button
+                          onClick={() => setConfirmDelete(null)}
+                          className="px-2.5 py-1.5 border border-border text-xs font-semibold rounded-lg hover:bg-muted transition-colors text-foreground"
+                        >
+                          No
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDelete(a.user_id)}
+                        className="p-1.5 text-muted-foreground hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

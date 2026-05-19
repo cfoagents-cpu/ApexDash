@@ -12,6 +12,15 @@ export function RevenueLineChart({ data }: { data: DataPoint[] }) {
   const { resolvedTheme } = useTheme();
   const dark = resolvedTheme === 'dark';
 
+  if (data.every(d => d.revenue === 0)) {
+    return (
+      <div className="h-[260px] flex flex-col items-center justify-center gap-2 text-center">
+        <p className="text-sm text-muted-foreground">No revenue data yet</p>
+        <p className="text-xs text-muted-foreground/70">Add your monthly numbers in My Data to see this chart</p>
+      </div>
+    );
+  }
+
   const grid   = dark ? '#2A2E37' : '#F3F4F6';
   const tick   = dark ? '#9AA0A6' : '#9CA3AF';
   const tipBg  = dark ? '#22262F' : '#ffffff';

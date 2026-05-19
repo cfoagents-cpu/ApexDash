@@ -12,6 +12,7 @@ import { useDateRange } from '@/contexts/DateRangeContext';
 import { periodLabel } from '@/lib/rangedData';
 import { formatCurrency, formatPercent, formatRatio } from '@/lib/formatters';
 import { useBusinessData } from '@/hooks/useBusinessData';
+import { SetupProgressCard } from '@/components/SetupProgressCard';
 
 export default function OverviewPage() {
   const { range } = useDateRange();
@@ -26,6 +27,8 @@ export default function OverviewPage() {
         <h2 className="text-xl font-bold text-foreground">Overview</h2>
         <p className="text-muted-foreground text-sm mt-0.5">{period}</p>
       </div>
+
+      <SetupProgressCard />
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <KpiCard title="Total Revenue" value={formatCurrency(s.totalRevenue)} change={c.totalRevenue} icon={<DollarSign className="w-4 h-4" />} formula="Sum of all completed job payments for this period" whyItMatters="Your top-line revenue shows if the business is growing. Compare period-over-period to spot trends early." />

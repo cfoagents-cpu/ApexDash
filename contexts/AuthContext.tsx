@@ -3,11 +3,14 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { type User, type Business, findUser, getBusiness } from '@/lib/auth';
 import { supabase, type BusinessProfile } from '@/lib/supabase';
+import { fetchUserMetrics, metricsToBusinessData, type UserMetrics } from '@/lib/userMetrics';
 
 interface AuthContextType {
   user: User | null;
   business: Business | null;
   isRealUser: boolean;
+  metrics: UserMetrics | null;
+  setMetrics: (m: UserMetrics) => void;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
   logout: () => Promise<void>;
   isLoading: boolean;
@@ -18,6 +21,8 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   business: null,
   isRealUser: false,
+  metrics: null,
+  setMetrics: () => {},
   login: async () => ({ ok: false }),
   logout: async () => {},
   isLoading: true,
@@ -55,6 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [business, setBusiness] = useState<Business | null>(null);
   const [isRealUser, setIsRealUser] = useState(false);
+  const [metrics, setMetrics] = useState<UserMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   async function loadSupabaseSession() {
@@ -69,9 +75,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (profile) {
       setUser(profileToUser(profile, session.user.email ?? ''));
-      // Only set business (unlocks dashboard) if approved
       setBusiness(profile.approved ? profileToBusiness(profile) : null);
       setIsRealUser(true);
+      if (profile.approved) {
+        const m = await fetchUserMetrics();
+        setMetrics(m);
+      }
       return true;
     }
 
@@ -86,7 +95,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     async function init() {
       // Check demo session first
       try {
-        const saved = localStorage.getItem('apex-session');
+        const saved = localStorage.getItem('fm-session');
         if (saved) {
           const parsed = JSON.parse(saved) as User;
           setUser(parsed);
@@ -96,7 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           return;
         }
       } catch {
-        localStorage.removeItem('apex-session');
+        localStorage.removeItem('fm-session');
       }
 
       // Check Supabase session
@@ -125,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(demoUser);
       setBusiness(biz);
       setIsRealUser(false);
-      localStorage.setItem('apex-session', JSON.stringify(demoUser));
+      localStorage.setItem('fm-session', JSON.stringify(demoUser));
       return { ok: true };
     }
 
@@ -138,11 +147,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function logout() {
-    localStorage.removeItem('apex-session');
+    localStorage.removeItem('fm-session');
     await supabase.auth.signOut();
     setUser(null);
     setBusiness(null);
     setIsRealUser(false);
+    setMetrics(null);
   }
 
   async function refreshBusiness() {
@@ -160,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, business, isRealUser, login, logout, isLoading, refreshBusiness }}>
+    <AuthContext.Provider value={{ user, business, isRealUser, metrics, setMetrics, login, logout, isLoading, refreshBusiness }}>
       {children}
     </AuthContext.Provider>
   );

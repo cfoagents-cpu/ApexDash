@@ -30,20 +30,27 @@ export default function SignupPage() {
 
     setLoading(true);
     const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
-    setLoading(false);
 
     if (signUpError) {
+      setLoading(false);
       setError(signUpError.message);
       return;
     }
 
-    // If session is null, email confirmation is still required
     if (!data.session) {
+      setLoading(false);
       setError('Please check your email and confirm your address before continuing.');
       return;
     }
 
-    router.push('/onboarding');
+    const res = await fetch('/api/stripe/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, userId: data.session.user.id }),
+    });
+    const { url } = await res.json();
+    setLoading(false);
+    window.location.href = url;
   }
 
   return (
@@ -54,7 +61,7 @@ export default function SignupPage() {
           <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
             <Zap className="w-5 h-5 text-white" fill="white" />
           </div>
-          <span className="text-foreground font-bold text-xl tracking-tight">Apex Dashboard</span>
+          <span className="text-foreground font-bold text-xl tracking-tight">FieldMetrics</span>
         </div>
 
         <div className="mb-8 text-center">

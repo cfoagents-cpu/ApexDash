@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Sidebar } from '@/components/Sidebar';
 import { TopBar } from '@/components/TopBar';
+import { WelcomeModal } from '@/components/WelcomeModal';
 import { DateRangeProvider } from '@/contexts/DateRangeContext';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -36,6 +37,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <DateRangeProvider>
+      <WelcomeModal />
       <div className="flex h-screen bg-background overflow-hidden">
         <Sidebar />
         <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
@@ -46,13 +48,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </span>
             </div>
           )}
-          {isRealUser && (
-            <div className="flex items-center justify-center gap-2 py-1.5 bg-blue-500/10 border-b border-blue-500/20 flex-shrink-0">
-              <span className="text-xs font-medium text-blue-600 dark:text-blue-400">
-                You&apos;re viewing sample data — real data entry coming soon
-              </span>
-            </div>
-          )}
+
           <TopBar />
           <main className="flex-1 overflow-y-auto p-6">{children}</main>
         </div>

@@ -21,6 +21,15 @@ export function ServicesBarChart() {
   const tipBdr = dark ? '#3C4049' : '#E5E7EB';
   const tipTxt = dark ? '#E8EAED' : '#111827';
 
+  if (data.length === 0) {
+    return (
+      <div className="h-[220px] flex flex-col items-center justify-center gap-2 text-center">
+        <p className="text-sm text-muted-foreground">No service data yet</p>
+        <p className="text-xs text-muted-foreground/70">Add your services in My Data to see this chart</p>
+      </div>
+    );
+  }
+
   return (
     <ResponsiveContainer width="100%" height={220}>
       <BarChart data={data} margin={{ top: 5, right: 10, bottom: 30, left: 10 }}>

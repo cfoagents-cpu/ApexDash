@@ -1,14 +1,19 @@
 import { useAuth } from '@/contexts/AuthContext';
-// Real users fall through to the apex/HVAC sample data by default
 import * as apexRanged from '@/lib/rangedData';
 import * as apexMock from '@/lib/mockData';
 import * as ridge from '@/lib/blueridgeData';
 import * as electric from '@/lib/electricalData';
 import * as peak from '@/lib/roofingData';
+import { metricsToBusinessData, EMPTY_METRICS } from '@/lib/userMetrics';
 import type { MonthlyRevenue } from '@/types';
 
 export function useBusinessData() {
-  const { business } = useAuth();
+  const { business, isRealUser, metrics } = useAuth();
+
+  if (isRealUser) {
+    if (metrics) return metricsToBusinessData(metrics);
+    return metricsToBusinessData(EMPTY_METRICS);
+  }
 
   if (business?.id === 'ridge') {
     return {

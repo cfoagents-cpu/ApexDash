@@ -11,14 +11,34 @@ import {
 } from '@/components/ui/select';
 import { useDateRange, type DateRange } from '@/contexts/DateRangeContext';
 import { NotificationPanel } from '@/components/NotificationPanel';
-import { notifications } from '@/lib/notifications';
+import { notifications as demoNotifications, type AppNotification } from '@/lib/notifications';
 import { useAuth } from '@/contexts/AuthContext';
+import { useBusinessData } from '@/hooks/useBusinessData';
 
 export function TopBar() {
   const { range, setRange } = useDateRange();
-  const { business } = useAuth();
+  const { business, isRealUser } = useAuth();
+  const { alerts } = useBusinessData();
   const [notifOpen, setNotifOpen] = useState(false);
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
+
+  const notifications: AppNotification[] = isRealUser
+    ? alerts.map(a => ({
+        id: a.id,
+        tier: (a.severity === 'high' ? 1 : a.severity === 'medium' ? 2 : 3) as 1 | 2 | 3,
+        title: a.title,
+        description: a.description,
+        what: a.description,
+        why: a.type === 'overdue-invoice'
+          ? 'Collection rates drop sharply after 30 days. Act now to avoid write-offs.'
+          : 'High callback rates hurt profitability and customer satisfaction.',
+        action: a.type === 'overdue-invoice'
+          ? 'Call the customer directly and offer a payment plan if needed.'
+          : 'Review the jobs with this technician and identify patterns.',
+        route: a.type === 'overdue-invoice' ? '/dashboard/revenue' : '/dashboard/operations',
+        time: 'Recent',
+      }))
+    : demoNotifications;
 
   const unreadCount = notifications.filter(
     n => (n.tier === 1 || n.tier === 2) && !readIds.has(n.id)
@@ -87,6 +107,7 @@ export function TopBar() {
           readIds={readIds}
           onMarkRead={markRead}
           onMarkAllRead={markAllRead}
+          notifications={notifications}
         />
       </div>
     </header>

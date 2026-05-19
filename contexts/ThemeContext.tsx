@@ -17,15 +17,12 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setTheme] = useState<Theme>('light');
+  const [theme, setTheme] = useState<Theme>(() => {
+    if (typeof window === 'undefined') return 'light';
+    const saved = localStorage.getItem('fm-theme') as Theme | null;
+    return (saved === 'dark' || saved === 'light' || saved === 'auto') ? saved : 'light';
+  });
   const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
-
-  useEffect(() => {
-    const saved = localStorage.getItem('apex-theme') as Theme | null;
-    if (saved === 'dark' || saved === 'light' || saved === 'auto') {
-      setTheme(saved);
-    }
-  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -45,11 +42,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       apply(mq.matches);
       const handler = (e: MediaQueryListEvent) => apply(e.matches);
       mq.addEventListener('change', handler);
-      localStorage.setItem('apex-theme', theme);
+      localStorage.setItem('fm-theme', theme);
       return () => mq.removeEventListener('change', handler);
     }
 
-    localStorage.setItem('apex-theme', theme);
+    localStorage.setItem('fm-theme', theme);
   }, [theme]);
 
   return (

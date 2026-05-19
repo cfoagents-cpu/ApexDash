@@ -59,7 +59,7 @@ export default function LoginPage() {
           <div className="w-9 h-9 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-600/30">
             <Zap className="w-5 h-5 text-white" fill="white" />
           </div>
-          <span className="text-white font-bold text-xl tracking-tight">Apex Dashboard</span>
+          <span className="text-white font-bold text-xl tracking-tight">FieldMetrics</span>
         </div>
 
         {/* Headline */}
@@ -71,7 +71,7 @@ export default function LoginPage() {
               <span className="text-blue-400">decisions that matter.</span>
             </h1>
             <p className="text-slate-400 text-lg leading-relaxed max-w-md">
-              Every KPI a home service business needs, live in one place. Know what's working, catch problems early, and grow with confidence.
+              Every KPI a home service business needs, live in one place. Know what&apos;s working, catch problems early, and grow with confidence.
             </p>
           </div>
 
@@ -107,7 +107,7 @@ export default function LoginPage() {
           <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
             <Zap className="w-4 h-4 text-white" fill="white" />
           </div>
-          <span className="text-foreground font-bold text-lg">Apex Dashboard</span>
+          <span className="text-foreground font-bold text-lg">FieldMetrics</span>
         </div>
 
         <div className="w-full max-w-sm mx-auto">

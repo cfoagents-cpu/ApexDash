@@ -95,7 +95,7 @@ export default function LoginPage() {
         {/* Bottom tagline */}
         <div className="relative">
           <p className="text-slate-500 text-sm">
-            Built for home service businesses · Austin, TX
+            Built for home service businesses · OC, California
           </p>
         </div>
       </div>

@@ -14,6 +14,7 @@ export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [billing, setBilling] = useState<'founding_monthly' | 'founding_annual'>('founding_monthly');
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -46,7 +47,7 @@ export default function SignupPage() {
     const res = await fetch('/api/stripe/checkout', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, userId: data.session.user.id }),
+      body: JSON.stringify({ email, userId: data.session.user.id, plan: billing }),
     });
     const { url } = await res.json();
     setLoading(false);
@@ -64,9 +65,28 @@ export default function SignupPage() {
           <span className="text-foreground font-bold text-xl tracking-tight">FieldMetrics</span>
         </div>
 
-        <div className="mb-8 text-center">
+        <div className="mb-6 text-center">
           <h1 className="text-2xl font-bold text-foreground">Create your account</h1>
           <p className="text-muted-foreground text-sm mt-1">Get your business dashboard set up in minutes</p>
+        </div>
+
+        {/* Billing toggle */}
+        <div className="mb-6 p-1 bg-muted rounded-xl flex">
+          <button
+            type="button"
+            onClick={() => setBilling('founding_monthly')}
+            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${billing === 'founding_monthly' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'}`}
+          >
+            Monthly — $97/mo
+          </button>
+          <button
+            type="button"
+            onClick={() => setBilling('founding_annual')}
+            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${billing === 'founding_annual' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'}`}
+          >
+            Annual — $970/yr
+            <span className="ml-1.5 text-xs text-green-500 font-bold">2 months free</span>
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">

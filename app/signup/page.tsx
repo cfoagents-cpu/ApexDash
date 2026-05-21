@@ -70,22 +70,26 @@ export default function SignupPage() {
           <p className="text-muted-foreground text-sm mt-1">Get your business dashboard set up in minutes</p>
         </div>
 
-        {/* Billing toggle */}
-        <div className="mb-6 p-1 bg-muted rounded-xl flex">
+        {/* Plan selection */}
+        <div className="mb-6 grid grid-cols-2 gap-3">
           <button
             type="button"
             onClick={() => setBilling('founding_monthly')}
-            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${billing === 'founding_monthly' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'}`}
+            className={`p-3 rounded-xl border-2 text-left transition-all ${billing === 'founding_monthly' ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-border bg-background'}`}
           >
-            Monthly — $97/mo
+            <p className="text-xs text-muted-foreground font-medium mb-1">Monthly</p>
+            <p className="text-lg font-bold text-foreground">$97</p>
+            <p className="text-xs text-muted-foreground">per month</p>
           </button>
           <button
             type="button"
             onClick={() => setBilling('founding_annual')}
-            className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all ${billing === 'founding_annual' ? 'bg-background text-foreground shadow-sm' : 'text-muted-foreground'}`}
+            className={`p-3 rounded-xl border-2 text-left transition-all relative ${billing === 'founding_annual' ? 'border-blue-500 bg-blue-50 dark:bg-blue-950/30' : 'border-border bg-background'}`}
           >
-            Annual — $970/yr
-            <span className="ml-1.5 text-xs text-green-500 font-bold">2 months free</span>
+            <span className="absolute -top-2 right-2 bg-green-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full">2 MONTHS FREE</span>
+            <p className="text-xs text-muted-foreground font-medium mb-1">Annual</p>
+            <p className="text-lg font-bold text-foreground">$970</p>
+            <p className="text-xs text-muted-foreground">per year</p>
           </button>
         </div>
 

@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, DollarSign, Users, Wrench,
-  TrendingUp, FileText, Settings, Zap, LogOut, Lock,
+  TrendingUp, FileText, Settings, Zap, LogOut, Lock, Radio,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,10 +16,11 @@ const navItems = [
   { href: '/dashboard/operations', icon: Wrench,          label: 'Operations'          },
   { href: '/dashboard/sales',      icon: TrendingUp,      label: 'Sales'               },
   { href: '/dashboard/reports',    icon: FileText,        label: 'Reports'             },
+  { href: '/dashboard/outreach',   icon: Radio,           label: 'Outreach'            },
   { href: '/dashboard/settings',   icon: Settings,        label: 'Settings'            },
 ];
 
-export function Sidebar() {
+export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, business, logout } = useAuth();
@@ -37,7 +38,11 @@ export function Sidebar() {
     .toUpperCase() ?? '?';
 
   return (
-    <aside className="w-60 bg-slate-900 flex flex-col h-screen flex-shrink-0">
+    <aside className={cn(
+      'w-60 bg-slate-900 flex flex-col h-screen flex-shrink-0 transition-transform duration-300',
+      'fixed lg:relative z-30 lg:z-auto lg:translate-x-0',
+      isOpen ? 'translate-x-0' : '-translate-x-full'
+    )}>
       {/* Logo */}
       <div className="px-5 py-5 border-b border-slate-700/60">
         <div className="flex items-center gap-3">

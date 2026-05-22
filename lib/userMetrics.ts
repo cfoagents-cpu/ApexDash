@@ -84,6 +84,7 @@ export interface StoredInvoice {
 export interface UserMetrics {
   monthly_data: MonthlyEntry[];
   averages: BusinessAverages;
+  prev_averages?: BusinessAverages;
   services: StoredService[];
   lead_sources: StoredLeadSource[];
   technicians_data: StoredTechnician[];
@@ -146,9 +147,28 @@ export async function fetchUserMetrics(): Promise<UserMetrics | null> {
     cost_per_lead: data.cost_per_lead ?? 0,
   };
 
+  const prev = data.prev_averages as Partial<BusinessAverages> | null;
+  const prev_averages: BusinessAverages | undefined = prev ? {
+    avg_job_value: prev.avg_job_value ?? 0,
+    profit_margin: prev.profit_margin ?? 0,
+    outstanding_invoices: prev.outstanding_invoices ?? 0,
+    ltv: prev.ltv ?? 0, crr: prev.crr ?? 0, cac: prev.cac ?? 0,
+    repeat_customer_rate: prev.repeat_customer_rate ?? 0,
+    avg_review_rating: prev.avg_review_rating ?? 0,
+    job_completion_rate: prev.job_completion_rate ?? 0,
+    first_time_fix_rate: prev.first_time_fix_rate ?? 0,
+    avg_response_time: prev.avg_response_time ?? 0,
+    technician_utilization: prev.technician_utilization ?? 0,
+    callback_rate: prev.callback_rate ?? 0,
+    lead_conversion_rate: prev.lead_conversion_rate ?? 0,
+    estimates_won: prev.estimates_won ?? 0,
+    cost_per_lead: prev.cost_per_lead ?? 0,
+  } : undefined;
+
   return {
     monthly_data: data.monthly_data ?? [],
     averages,
+    prev_averages,
     services: data.services ?? [],
     lead_sources: data.lead_sources ?? [],
     technicians_data: data.technicians_data ?? [],
@@ -165,6 +185,7 @@ export async function saveUserMetrics(metrics: UserMetrics): Promise<void> {
   await supabase.from('business_metrics').upsert({
     user_id: session.user.id,
     ...metrics.averages,
+    prev_averages: metrics.prev_averages ?? null,
     monthly_data: metrics.monthly_data,
     services: metrics.services,
     lead_sources: metrics.lead_sources,
@@ -227,30 +248,31 @@ function buildChanges(
   curJobs: number, prevJobs: number,
   curLeads: number, prevLeads: number,
   curCust: number, prevCust: number,
+  cur?: BusinessAverages, prev?: BusinessAverages,
 ): RangedChanges {
   return {
-    totalRevenue:         chg(curRev,  prevRev),
-    activeJobs:           chg(curJobs, prevJobs),
-    totalLeads:           chg(curLeads, prevLeads),
-    totalConversions:     chg(curCust,  prevCust),
-    avgJobValue:          null,
-    profitMargin:         null,
-    outstandingInvoices:  null,
-    revenuePerTechnician: null,
-    ltv:                  null,
-    crr:                  null,
-    cac:                  null,
-    ltvCacRatio:          null,
-    repeatCustomerRate:   null,
-    avgReviewRating:      null,
-    jobCompletionRate:    null,
-    firstTimeFixRate:     null,
-    avgResponseTimeHours: null,
-    technicianUtilization:null,
-    callbackRate:         null,
-    leadConversionRate:   null,
-    estimatesWon:         null,
-    costPerLead:          null,
+    totalRevenue:          chg(curRev,   prevRev),
+    activeJobs:            chg(curJobs,  prevJobs),
+    totalLeads:            chg(curLeads, prevLeads),
+    totalConversions:      chg(curCust,  prevCust),
+    avgJobValue:           cur && prev ? chg(cur.avg_job_value,        prev.avg_job_value)        : null,
+    profitMargin:          cur && prev ? chg(cur.profit_margin,         prev.profit_margin)         : null,
+    outstandingInvoices:   cur && prev ? chg(cur.outstanding_invoices,  prev.outstanding_invoices)  : null,
+    revenuePerTechnician:  null,
+    ltv:                   cur && prev ? chg(cur.ltv,                   prev.ltv)                   : null,
+    crr:                   cur && prev ? chg(cur.crr,                   prev.crr)                   : null,
+    cac:                   cur && prev ? chg(cur.cac,                   prev.cac)                   : null,
+    ltvCacRatio:           null,
+    repeatCustomerRate:    cur && prev ? chg(cur.repeat_customer_rate,  prev.repeat_customer_rate)  : null,
+    avgReviewRating:       cur && prev ? chg(cur.avg_review_rating,     prev.avg_review_rating)     : null,
+    jobCompletionRate:     cur && prev ? chg(cur.job_completion_rate,   prev.job_completion_rate)   : null,
+    firstTimeFixRate:      cur && prev ? chg(cur.first_time_fix_rate,   prev.first_time_fix_rate)   : null,
+    avgResponseTimeHours:  cur && prev ? chg(cur.avg_response_time,     prev.avg_response_time)     : null,
+    technicianUtilization: cur && prev ? chg(cur.technician_utilization,prev.technician_utilization): null,
+    callbackRate:          cur && prev ? chg(cur.callback_rate,         prev.callback_rate)         : null,
+    leadConversionRate:    cur && prev ? chg(cur.lead_conversion_rate,  prev.lead_conversion_rate)  : null,
+    estimatesWon:          cur && prev ? chg(cur.estimates_won,         prev.estimates_won)         : null,
+    costPerLead:           cur && prev ? chg(cur.cost_per_lead,         prev.cost_per_lead)         : null,
   };
 }
 
@@ -351,12 +373,13 @@ export function metricsToBusinessData(metrics: UserMetrics) {
     year:    buildStats(revY,      sum(entries,'jobs',12),             leadsY,  custY,  a, techCount),
   };
 
+  const p = metrics.prev_averages;
   const rangedChanges: Record<DateRange, RangedChanges> = {
-    today:   buildChanges(revToday, Math.round(revPrev30/30),  Math.round(jobs30/30),  Math.round(jobsPrev30/30),  Math.round(leads30/30),  Math.round(leadsPrev30/30),  Math.round(cust30/30),  Math.round(custPrev30/30)),
-    '7d':    buildChanges(rev7d,    Math.round(revPrev30/4),   Math.round(jobs30/4),   Math.round(jobsPrev30/4),   Math.round(leads30/4),   Math.round(leadsPrev30/4),   Math.round(cust30/4),   Math.round(custPrev30/4)),
-    '30d':   buildChanges(rev30,    revPrev30,                 jobs30,                 jobsPrev30,                 leads30,                 leadsPrev30,                 cust30,                 custPrev30),
-    quarter: buildChanges(revQ,     revPrevQ,                  sum(entries,'jobs',3),  jobsPrevQ,                  leadsQ,                  leadsPrevQ,                  custQ,                  custPrevQ),
-    year:    buildChanges(revY,     0,                         sum(entries,'jobs',12), jobsPrevY,                  leadsY,                  leadsPrevY,                  custY,                  custPrevY),
+    today:   buildChanges(revToday, Math.round(revPrev30/30),  Math.round(jobs30/30),  Math.round(jobsPrev30/30),  Math.round(leads30/30),  Math.round(leadsPrev30/30),  Math.round(cust30/30),  Math.round(custPrev30/30),  a, p),
+    '7d':    buildChanges(rev7d,    Math.round(revPrev30/4),   Math.round(jobs30/4),   Math.round(jobsPrev30/4),   Math.round(leads30/4),   Math.round(leadsPrev30/4),   Math.round(cust30/4),   Math.round(custPrev30/4),   a, p),
+    '30d':   buildChanges(rev30,    revPrev30,                 jobs30,                 jobsPrev30,                 leads30,                 leadsPrev30,                 cust30,                 custPrev30,                 a, p),
+    quarter: buildChanges(revQ,     revPrevQ,                  sum(entries,'jobs',3),  jobsPrevQ,                  leadsQ,                  leadsPrevQ,                  custQ,                  custPrevQ,                  a, p),
+    year:    buildChanges(revY,     0,                         sum(entries,'jobs',12), jobsPrevY,                  leadsY,                  leadsPrevY,                  custY,                  custPrevY,                  a, p),
   };
 
   const revenueChartData: Record<DateRange, { label: string; revenue: number }[]> = {

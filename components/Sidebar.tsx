@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, DollarSign, Users, Wrench,
-  TrendingUp, FileText, Settings, Zap, LogOut, Lock, Radio,
+  TrendingUp, FileText, Settings, Zap, LogOut, Lock,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -16,7 +16,6 @@ const navItems = [
   { href: '/dashboard/operations', icon: Wrench,          label: 'Operations'          },
   { href: '/dashboard/sales',      icon: TrendingUp,      label: 'Sales'               },
   { href: '/dashboard/reports',    icon: FileText,        label: 'Reports'             },
-  { href: '/dashboard/outreach',   icon: Radio,           label: 'Outreach'            },
   { href: '/dashboard/settings',   icon: Settings,        label: 'Settings'            },
 ];
 

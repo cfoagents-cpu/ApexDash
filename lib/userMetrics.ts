@@ -310,12 +310,13 @@ export function metricsToBusinessData(metrics: UserMetrics) {
     utilization: Math.round((t.billableHours / Math.max(1, t.hoursWorked)) * 100),
   }));
 
+  const jobs30 = sum(entries, 'jobs', 1);
   const rangedStats: Record<DateRange, RangedStats> = {
-    today:   buildStats(revToday,  0,                      Math.round(leads30/30), Math.round(cust30/30), a, techCount),
-    '7d':    buildStats(rev7d,     0,                      Math.round(leads30/4),  Math.round(cust30/4),  a, techCount),
-    '30d':   buildStats(rev30,     sum(entries,'jobs',1),  leads30, cust30, a, techCount),
-    quarter: buildStats(revQ,      sum(entries,'jobs',3),  leadsQ,  custQ,  a, techCount),
-    year:    buildStats(revY,      sum(entries,'jobs',12), leadsY,  custY,  a, techCount),
+    today:   buildStats(revToday,  Math.max(1, Math.round(jobs30/30)), Math.round(leads30/30), Math.round(cust30/30), a, techCount),
+    '7d':    buildStats(rev7d,     Math.max(1, Math.round(jobs30/4)),  Math.round(leads30/4),  Math.round(cust30/4),  a, techCount),
+    '30d':   buildStats(rev30,     jobs30,                             leads30, cust30, a, techCount),
+    quarter: buildStats(revQ,      sum(entries,'jobs',3),              leadsQ,  custQ,  a, techCount),
+    year:    buildStats(revY,      sum(entries,'jobs',12),             leadsY,  custY,  a, techCount),
   };
 
   const rangedChanges: Record<DateRange, RangedChanges> = {

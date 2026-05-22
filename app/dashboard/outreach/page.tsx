@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Mail, MessageSquare, Phone, Linkedin, Plus, Trash2 } from 'lucide-react';
+import { Mail, MessageSquare, Phone, Link2, Plus, Trash2 } from 'lucide-react';
 
 type Channel = 'email' | 'sms' | 'calls' | 'linkedin';
 
@@ -19,7 +19,7 @@ const CHANNELS: { key: Channel; label: string; icon: typeof Mail; color: string 
   { key: 'email',    label: 'Email',       icon: Mail,          color: 'blue'   },
   { key: 'sms',      label: 'SMS',         icon: MessageSquare, color: 'green'  },
   { key: 'calls',    label: 'Cold Calls',  icon: Phone,         color: 'purple' },
-  { key: 'linkedin', label: 'LinkedIn',    icon: Linkedin,      color: 'sky'    },
+  { key: 'linkedin', label: 'LinkedIn',    icon: Link2,         color: 'sky'    },
 ];
 
 const STORAGE_KEY = 'fm_outreach_data';

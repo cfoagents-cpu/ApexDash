@@ -217,17 +217,40 @@ function pctChange(current: number, prev: number): number {
   return Math.round(((current - prev) / prev) * 100 * 10) / 10;
 }
 
-function buildChanges(current: number, prev: number): RangedChanges {
-  const chg = prev === 0 ? null : pctChange(current, prev);
+function chg(current: number, prev: number): number | null {
+  if (!prev) return null;
+  return Math.round(((current - prev) / prev) * 100 * 10) / 10;
+}
+
+function buildChanges(
+  curRev: number, prevRev: number,
+  curJobs: number, prevJobs: number,
+  curLeads: number, prevLeads: number,
+  curCust: number, prevCust: number,
+): RangedChanges {
   return {
-    totalRevenue: chg, avgJobValue: null, profitMargin: null,
-    outstandingInvoices: null, revenuePerTechnician: null,
-    ltv: null, crr: null, cac: null, ltvCacRatio: null,
-    repeatCustomerRate: null, avgReviewRating: null,
-    jobCompletionRate: null, firstTimeFixRate: null, avgResponseTimeHours: null,
-    technicianUtilization: null, callbackRate: null, activeJobs: null,
-    leadConversionRate: null, estimatesWon: null, costPerLead: null,
-    totalLeads: null, totalConversions: null,
+    totalRevenue:         chg(curRev,  prevRev),
+    activeJobs:           chg(curJobs, prevJobs),
+    totalLeads:           chg(curLeads, prevLeads),
+    totalConversions:     chg(curCust,  prevCust),
+    avgJobValue:          null,
+    profitMargin:         null,
+    outstandingInvoices:  null,
+    revenuePerTechnician: null,
+    ltv:                  null,
+    crr:                  null,
+    cac:                  null,
+    ltvCacRatio:          null,
+    repeatCustomerRate:   null,
+    avgReviewRating:      null,
+    jobCompletionRate:    null,
+    firstTimeFixRate:     null,
+    avgResponseTimeHours: null,
+    technicianUtilization:null,
+    callbackRate:         null,
+    leadConversionRate:   null,
+    estimatesWon:         null,
+    costPerLead:          null,
   };
 }
 
@@ -252,8 +275,17 @@ export function metricsToBusinessData(metrics: UserMetrics) {
   const custQ  = sum(entries, 'new_customers', 3);
   const custY  = sum(entries, 'new_customers', 12);
 
-  const revPrev30 = entries.length >= 2 ? entries[entries.length - 2].revenue : 0;
-  const revPrevQ  = entries.length >= 6 ? entries.slice(-6, -3).reduce((s, e) => s + e.revenue, 0) : 0;
+  const revPrev30   = entries.length >= 2 ? entries[entries.length - 2].revenue : 0;
+  const revPrevQ    = entries.length >= 6 ? entries.slice(-6, -3).reduce((s, e) => s + e.revenue, 0) : 0;
+  const jobsPrev30  = entries.length >= 2 ? entries[entries.length - 2].jobs : 0;
+  const jobsPrevQ   = entries.length >= 6 ? entries.slice(-6, -3).reduce((s, e) => s + e.jobs, 0) : 0;
+  const jobsPrevY   = entries.length >= 12 ? entries.slice(0, 12).reduce((s, e) => s + e.jobs, 0) : 0;
+  const leadsPrev30 = entries.length >= 2 ? entries[entries.length - 2].leads : 0;
+  const leadsPrevQ  = entries.length >= 6 ? entries.slice(-6, -3).reduce((s, e) => s + e.leads, 0) : 0;
+  const leadsPrevY  = entries.length >= 12 ? entries.slice(0, 12).reduce((s, e) => s + e.leads, 0) : 0;
+  const custPrev30  = entries.length >= 2 ? entries[entries.length - 2].new_customers : 0;
+  const custPrevQ   = entries.length >= 6 ? entries.slice(-6, -3).reduce((s, e) => s + e.new_customers, 0) : 0;
+  const custPrevY   = entries.length >= 12 ? entries.slice(0, 12).reduce((s, e) => s + e.new_customers, 0) : 0;
 
   // Convert detail data
   const serviceData: ServiceData[] = (metrics.services ?? [])
@@ -320,11 +352,11 @@ export function metricsToBusinessData(metrics: UserMetrics) {
   };
 
   const rangedChanges: Record<DateRange, RangedChanges> = {
-    today:   buildChanges(revToday, Math.round(revPrev30 / 30)),
-    '7d':    buildChanges(rev7d,    Math.round(revPrev30 / 4)),
-    '30d':   buildChanges(rev30,    revPrev30),
-    quarter: buildChanges(revQ,     revPrevQ),
-    year:    buildChanges(revY,     0),
+    today:   buildChanges(revToday, Math.round(revPrev30/30),  Math.round(jobs30/30),  Math.round(jobsPrev30/30),  Math.round(leads30/30),  Math.round(leadsPrev30/30),  Math.round(cust30/30),  Math.round(custPrev30/30)),
+    '7d':    buildChanges(rev7d,    Math.round(revPrev30/4),   Math.round(jobs30/4),   Math.round(jobsPrev30/4),   Math.round(leads30/4),   Math.round(leadsPrev30/4),   Math.round(cust30/4),   Math.round(custPrev30/4)),
+    '30d':   buildChanges(rev30,    revPrev30,                 jobs30,                 jobsPrev30,                 leads30,                 leadsPrev30,                 cust30,                 custPrev30),
+    quarter: buildChanges(revQ,     revPrevQ,                  sum(entries,'jobs',3),  jobsPrevQ,                  leadsQ,                  leadsPrevQ,                  custQ,                  custPrevQ),
+    year:    buildChanges(revY,     0,                         sum(entries,'jobs',12), jobsPrevY,                  leadsY,                  leadsPrevY,                  custY,                  custPrevY),
   };
 
   const revenueChartData: Record<DateRange, { label: string; revenue: number }[]> = {

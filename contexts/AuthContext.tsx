@@ -93,7 +93,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     async function init() {
-      // Check demo session first
+      // Supabase session takes priority over any stale demo session
+      const hasSupabase = await loadSupabaseSession();
+      if (hasSupabase) {
+        localStorage.removeItem('fm-session');
+        setIsLoading(false);
+        return;
+      }
+
+      // Fall back to demo session only when no Supabase session exists
       try {
         const saved = localStorage.getItem('fm-session');
         if (saved) {
@@ -101,15 +109,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setUser(parsed);
           setBusiness(getBusiness(parsed.businessId) ?? null);
           setIsRealUser(false);
-          setIsLoading(false);
-          return;
         }
       } catch {
         localStorage.removeItem('fm-session');
       }
 
-      // Check Supabase session
-      await loadSupabaseSession();
       setIsLoading(false);
     }
 
@@ -139,6 +143,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Try Supabase auth
+    localStorage.removeItem('fm-session');
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     if (error) return { ok: false, error: 'Incorrect email or password.' };
 

@@ -11,9 +11,20 @@ export function adminDb() {
 }
 
 // ── Auth ──────────────────────────────────────────────────────────────────────
+const OWNER_EMAIL = 'jaxson@getfieldmetrics.com';
+
+/** Private-section auth (PRIVATE_PASSWORD token) */
 export function isAuthorized(req: Request): boolean {
   const token = (req.headers.get('authorization') ?? '').replace('Bearer ', '').trim();
   return !!token && token === process.env.PRIVATE_PASSWORD;
+}
+
+/** Dashboard auth (Supabase JWT — only allows the owner email) */
+export async function isOwner(req: Request): Promise<boolean> {
+  const token = (req.headers.get('authorization') ?? '').replace('Bearer ', '').trim();
+  if (!token) return false;
+  const { data: { user } } = await adminDb().auth.getUser(token);
+  return user?.email === OWNER_EMAIL;
 }
 
 // ── Types ─────────────────────────────────────────────────────────────────────

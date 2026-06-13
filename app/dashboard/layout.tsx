@@ -9,7 +9,7 @@ import { DateRangeProvider } from '@/contexts/DateRangeContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const { user, business, isRealUser, isLoading } = useAuth();
+  const { user, business, isRealUser, isOwner, isLoading } = useAuth();
   const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -19,7 +19,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       router.replace('/login');
       return;
     }
-    const isOwner = user.email === 'jaxson@getfieldmetrics.com';
     if (isRealUser && user.businessId === '' && !isOwner) {
       router.replace('/onboarding');
     } else if (isRealUser && !business && !isOwner) {

@@ -9,6 +9,7 @@ interface AuthContextType {
   user: User | null;
   business: Business | null;
   isRealUser: boolean;
+  isOwner: boolean;
   metrics: UserMetrics | null;
   setMetrics: (m: UserMetrics) => void;
   login: (email: string, password: string) => Promise<{ ok: boolean; error?: string }>;
@@ -21,6 +22,7 @@ const AuthContext = createContext<AuthContextType>({
   user: null,
   business: null,
   isRealUser: false,
+  isOwner: false,
   metrics: null,
   setMetrics: () => {},
   login: async () => ({ ok: false }),
@@ -56,16 +58,23 @@ function profileToUser(profile: BusinessProfile, email: string): User {
   };
 }
 
+const OWNER_EMAIL = 'jaxson@getfieldmetrics.com';
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [business, setBusiness] = useState<Business | null>(null);
   const [isRealUser, setIsRealUser] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
   const [metrics, setMetrics] = useState<UserMetrics | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   async function loadSupabaseSession() {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) return false;
+
+    const sessionEmail = session.user.email ?? '';
+    const ownerSession = sessionEmail.toLowerCase() === OWNER_EMAIL.toLowerCase();
+    setIsOwner(ownerSession);
 
     const { data: profile } = await supabase
       .from('businesses')
@@ -74,7 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .single();
 
     if (profile) {
-      setUser(profileToUser(profile, session.user.email ?? ''));
+      setUser(profileToUser(profile, sessionEmail));
       setBusiness(profile.approved ? profileToBusiness(profile) : null);
       setIsRealUser(true);
       if (profile.approved) {
@@ -85,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     // Signed up but hasn't completed onboarding yet
-    setUser({ id: session.user.id, name: '', email: session.user.email ?? '', password: '', role: 'admin', businessId: '', jobTitle: 'Owner' });
+    setUser({ id: session.user.id, name: 'Owner', email: sessionEmail, password: '', role: 'admin', businessId: '', jobTitle: 'Owner' });
     setBusiness(null);
     setIsRealUser(true);
     return true;
@@ -157,6 +166,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setUser(null);
     setBusiness(null);
     setIsRealUser(false);
+    setIsOwner(false);
     setMetrics(null);
   }
 
@@ -175,7 +185,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, business, isRealUser, metrics, setMetrics, login, logout, isLoading, refreshBusiness }}>
+    <AuthContext.Provider value={{ user, business, isRealUser, isOwner, metrics, setMetrics, login, logout, isLoading, refreshBusiness }}>
       {children}
     </AuthContext.Provider>
   );

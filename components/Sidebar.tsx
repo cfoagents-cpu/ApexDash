@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard, DollarSign, Users, Wrench,
-  TrendingUp, FileText, Settings, Zap, LogOut, Lock,
+  TrendingUp, FileText, Settings, Zap, LogOut, Lock, ClipboardList, Radio, DatabaseZap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,7 @@ const navItems = [
   { href: '/dashboard/revenue',    icon: DollarSign,      label: 'Revenue'             },
   { href: '/dashboard/customers',  icon: Users,           label: 'Customers'           },
   { href: '/dashboard/operations', icon: Wrench,          label: 'Operations'          },
+  { href: '/dashboard/jobs',       icon: ClipboardList,   label: 'Jobs & Invoices'     },
   { href: '/dashboard/sales',      icon: TrendingUp,      label: 'Sales'               },
   { href: '/dashboard/reports',    icon: FileText,        label: 'Reports'             },
   { href: '/dashboard/settings',   icon: Settings,        label: 'Settings'            },
@@ -22,7 +23,7 @@ const navItems = [
 export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, business, logout } = useAuth();
+  const { user, business, logout, isRealUser, isOwner } = useAuth();
 
   function handleLogout() {
     logout();
@@ -59,7 +60,10 @@ export function Sidebar({ isOpen, onClose }: { isOpen?: boolean; onClose?: () =>
 
       {/* Navigation */}
       <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {navItems.map(({ href, icon: Icon, label, exact }) => {
+        {[...navItems, ...(isOwner ? [
+          { href: '/dashboard/outreach', icon: Radio,        label: 'Outreach' },
+          { href: '/dashboard/leads',    icon: DatabaseZap,  label: 'Leads'    },
+        ] : [])].map(({ href, icon: Icon, label, exact }) => {
           const isActive = exact ? pathname === href : pathname.startsWith(href);
           const isSettingsViewerLocked = href === '/dashboard/settings' && user?.role === 'viewer';
 
